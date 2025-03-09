@@ -148,10 +148,62 @@ class Plant(Organism):
             self.size += growth
             self.energy -= growth * 0.5  # Growth costs energy
             
-            # Output seasonal info for debugging
-            if hasattr(environment, "year_length"):
-                result["season"] = current_season
-                result["season_factor"] = season_factor
+            # Check reproduction possibility - more likely in spring/summer
+        if self.can_reproduce(environment):
+            # Get season information
+            try:
+                season_idx = int(((environment.time % environment.year_length) / environment.year_length) * 4) % 4
+                season_names = ["Spring", "Summer", "Fall", "Winter"]
+                current_season = season_names[season_idx]
+                
+                # Season-specific reproduction chances
+                repro_chances = {
+                    "Spring": 0.05,   # High in spring
+                    "Summer": 0.03,   # Good in summer
+                    "Fall": 0.01,     # Low in fall
+                    "Winter": 0.001   # Very rare in winter
+                }
+                
+                repro_chance = repro_chances.get(current_season, 0.01) * delta_time
+                
+                # Reproduction more likely with good conditions
+                if env_factors.moisture > 0.4 and light_level > 0.5 and self.energy > 0.7:
+                    if random.random() < repro_chance:
+                        # Try to reproduce
+                        result["reproduction_attempt"] = True
+            except AttributeError:
+                # No seasons defined, use base rate
+                if random.random() < 0.01 * delta_time:
+                    result["reproduction_attempt"] = True
+            
+        # Check for death conditions
+        death_chance = 0.0
+        
+        # More likely to die in harsh conditions
+        if env_factors.moisture < 0.2:
+            death_chance += 0.02 * delta_time  # Drought
+        
+        if light_level < 0.2:
+            death_chance += 0.01 * delta_time  # Insufficient light
+        
+        # Seasonal death factors
+        try:
+            if current_season == "Winter":
+                death_chance += 0.03 * delta_time  # Winter is harsh
+            elif current_season == "Fall":
+                death_chance += 0.01 * delta_time  # Fall has some die-off
+        except:
+            pass
+            
+        # Old age increases death chance
+        if self.age > self.lifespan * 0.8:
+            death_chance += 0.05 * delta_time  # Aging
+        
+        # Apply the death chance
+        if random.random() < death_chance:
+            self.alive = False
+            result["alive"] = False
+            result["death_cause"] = "environmental_stress"
         
         result.update({
             "photosynthesis": energy_gain,

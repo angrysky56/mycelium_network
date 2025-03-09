@@ -156,8 +156,73 @@ class Herbivore(Organism):
                     "energy_gain": energy_gain
                 }
             
-                # Debug output
-                print(f"Herbivore {self.id} forced fed on plant {plant_id} and gained {energy_gain:.3f} energy")
+            # Debug output
+            print(f"Herbivore {self.id} forced fed on plant {plant_id} and gained {energy_gain:.3f} energy")
+        
+        # Check reproduction possibility - best in spring and summer
+        if self.can_reproduce(environment):
+            # Get season information
+            try:
+                season_idx = int(((environment.time % environment.year_length) / environment.year_length) * 4) % 4
+                season_names = ["Spring", "Summer", "Fall", "Winter"]
+                current_season = season_names[season_idx]
+                
+                # Season-specific reproduction chances
+                repro_chances = {
+                    "Spring": 0.03,   # Good in spring - new food 
+                    "Summer": 0.04,   # Best in summer - plentiful food
+                    "Fall": 0.02,     # Fair in fall - storing up
+                    "Winter": 0.001   # Very rare in winter - conserving energy
+                }
+                
+                repro_chance = repro_chances.get(current_season, 0.01) * delta_time
+                
+                # Reproduction only when well-fed
+                if self.hunger_level < 0.4 and self.energy > 0.7:
+                    if random.random() < repro_chance:
+                        # Try to reproduce
+                        result["reproduction_attempt"] = True
+            except AttributeError:
+                # No seasons defined, use base rate
+                if random.random() < 0.01 * delta_time:
+                    result["reproduction_attempt"] = True
+        
+        # Check for death conditions
+        death_chance = 0.0
+        
+        # Starvation risk
+        if self.hunger_level > 0.9:
+            death_chance += 0.04 * delta_time  # High starvation risk
+        elif self.hunger_level > 0.7:
+            death_chance += 0.01 * delta_time  # Moderate hunger
+        
+        # Environmental stressors
+        if env_factors.temperature < 0.2:
+            death_chance += 0.02 * delta_time  # Cold stress
+        
+        # Seasonal death factors
+        try:
+            if current_season == "Winter":
+                death_chance += 0.04 * delta_time  # Winter is harsh
+        except:
+            pass
+            
+        # Old age and energy depletion
+        if self.age > self.lifespan * 0.8:
+            death_chance += 0.03 * delta_time  # Aging
+        if self.energy < 0.1:
+            death_chance += 0.05 * delta_time  # Energy depletion
+        
+        # Apply the death chance
+        if random.random() < death_chance:
+            self.alive = False
+            result["alive"] = False
+            if self.hunger_level > 0.8:
+                result["death_cause"] = "starvation"
+            elif self.age > self.lifespan * 0.8:
+                result["death_cause"] = "old_age"
+            else:
+                result["death_cause"] = "environmental_stress"
                 
         # Regular logic
         if plants_in_range:  # Remove hunger check to ensure eating

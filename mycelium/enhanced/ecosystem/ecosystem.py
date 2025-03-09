@@ -189,7 +189,8 @@ class Ecosystem:
         energy_consumed = 0.0
         energy_recycled = 0.0
         
-        # Update each organism
+        # Update each organism and track deaths
+        dead_organisms = []
         for organism_id, organism in list(self.organisms.items()):
             if not organism.alive:
                 continue
@@ -228,48 +229,42 @@ class Ecosystem:
             
             # Check for death
             if not update_result.get("alive", True) and organism.alive:
+                print(f"DEBUG: {organism.__class__.__name__} {organism_id} died of {update_result.get('death_cause', 'unknown causes')}")
                 organism.alive = False
                 deaths += 1
-        
-        # Handle reproduction
-        new_organisms = []
-        for organism_id, organism in list(self.organisms.items()):
-            if not organism.alive:
-                continue
-            
-            # Check if can reproduce
-            if organism.can_reproduce(self.environment):
-                # Find partner if needed
-                partner = None
-                if organism.reproduction_strategy.name == "SEXUAL":
-                    # Get potential partners
+                dead_organisms.append(organism_id)
+                
+            # Check for reproduction attempts
+            if update_result.get("reproduction_attempt", False) and organism.alive:
+                suitable_partners = []
+                
+                if organism.reproduction_strategy.name == "SEXUAL":  # Sexual reproduction needs a partner
+                    # Find potential partner of same type
                     organism_type = organism.__class__.__name__.lower()
                     potential_partners = self.get_organisms_by_type(organism_type)
                     
-                    # Filter for alive, in range, and not self
-                    in_range = []
-                    for pot_partner in potential_partners:
-                        if (pot_partner.id != organism.id and pot_partner.alive and
-                            pot_partner.can_reproduce(self.environment)):
-                            # Calculate distance
+                    for potential_partner in potential_partners:
+                        if (potential_partner.id != organism.id and potential_partner.alive 
+                            and potential_partner.can_reproduce(self.environment)):
+                            # Check if close enough
                             distance = np.sqrt(sum((a - b) ** 2 for a, b in zip(
-                                organism.position, pot_partner.position)))
-                            
-                            if distance < 0.2:  # Must be close
-                                in_range.append(pot_partner)
-                    
-                    if in_range:
-                        partner = random.choice(in_range)
-                
-                # Attempt reproduction
-                offspring = organism.reproduce(self.environment, partner)
-                if offspring:
-                    new_organisms.append(offspring)
-                    births += 1
-        
-        # Add new organisms
-        for new_org in new_organisms:
-            self.add_organism(new_org)
+                                organism.position, potential_partner.position)))
+                            if distance < 0.2:  # Close enough
+                                suitable_partners.append(potential_partner)
+                                
+                    if suitable_partners:  # Found suitable partner
+                        partner = random.choice(suitable_partners)
+                        offspring = organism.reproduce(self.environment, partner)
+                        if offspring:  # Successful reproduction
+                            self.add_organism(offspring)
+                            births += 1
+                            print(f"DEBUG: {organism.__class__.__name__} {organism_id} reproduced with {partner.id} to create {offspring.id}")
+                else:  # Asexual reproduction, no partner needed
+                    offspring = organism.reproduce(self.environment)
+                    if offspring:  # Successful reproduction
+                        self.add_organism(offspring)
+                        births += 1
+                        print(f"DEBUG: {organism.__class__.__name__} {organism_id} reproduced to create {offspring.id}")
         
         # Process interactions between organisms
         interactions_processed = self._process_interactions(delta_time)
@@ -279,7 +274,9 @@ class Ecosystem:
         population_stats = {
             "time": self.environment.time,
             "total": len([o for o in self.organisms.values() if o.alive]),
-            "by_type": {}
+            "by_type": {},
+            "births": births,
+            "deaths": deaths
         }
         
         for org_type in self.organism_registry:

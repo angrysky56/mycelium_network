@@ -81,7 +81,7 @@ def demo_ecosystem_creation():
     return ecosystem
 
 
-def run_ecosystem_simulation(ecosystem, steps=60, time_per_step=0.5):
+def run_ecosystem_simulation(ecosystem, steps=100, time_per_step=0.5):
     """Run the ecosystem simulation for several steps."""
     print_separator("Ecosystem Simulation")
     
@@ -100,8 +100,8 @@ def run_ecosystem_simulation(ecosystem, steps=60, time_per_step=0.5):
     
     # Run simulation steps
     print(f"Running simulation for {steps} steps:")
-    print(f"{'Step':^5} | {'Time':^5} | {'Plants':^6} | {'Herbivores':^10} | {'Decomposers':^10} | {'Season':^8}")
-    print("-" * 60)
+    print(f"{'Step':^5} | {'Time':^5} | {'Plants':^6} | {'Herbivores':^10} | {'Decomposers':^10} | {'Births':^6} | {'Deaths':^6} | {'Season':^8}")
+    print("-" * 80)
     
     for step in range(steps):
         # Update ecosystem
@@ -116,7 +116,9 @@ def run_ecosystem_simulation(ecosystem, steps=60, time_per_step=0.5):
         
         # Print status
         pop = stats["population"]["by_type"]
-        print(f"{step+1:^5} | {env.time:5.1f} | {pop.get('plant', 0):^6} | {pop.get('herbivore', 0):^10} | {pop.get('decomposer', 0):^10} | {current_season:^8}")
+        births = stats["births"]
+        deaths = stats["deaths"]
+        print(f"{step+1:^5} | {env.time:5.1f} | {pop.get('plant', 0):^6} | {pop.get('herbivore', 0):^10} | {pop.get('decomposer', 0):^10} | {births:^6} | {deaths:^6} | {current_season:^8}")
         
         # Collect data for plots
         times.append(env.time)

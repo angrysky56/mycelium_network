@@ -215,6 +215,76 @@ class Decomposer(Organism):
             
             result["growth"] = growth
         
+        # Check reproduction possibility - best in fall when plenty of dead matter
+        if self.can_reproduce(environment):
+            # Get season information
+            try:
+                season_idx = int(((environment.time % environment.year_length) / environment.year_length) * 4) % 4
+                season_names = ["Spring", "Summer", "Fall", "Winter"]
+                current_season = season_names[season_idx]
+                
+                # Season-specific reproduction chances
+                # Decomposers reproduce most in fall when dead material is plentiful
+                repro_chances = {
+                    "Spring": 0.01,   # Low in spring
+                    "Summer": 0.02,   # Moderate in summer
+                    "Fall": 0.06,     # Highest in fall - lots of dead matter
+                    "Winter": 0.005   # Very low in winter - too cold
+                }
+                
+                repro_chance = repro_chances.get(current_season, 0.01) * delta_time
+                
+                # Reproduction conditions
+                if env_factors.moisture > 0.5 and self.energy > 0.6 and env_factors.temperature > 0.3:
+                    if random.random() < repro_chance:
+                        # Try to reproduce via spores
+                        result["reproduction_attempt"] = True
+            except AttributeError:
+                # No seasons defined, use base rate
+                if random.random() < 0.01 * delta_time:
+                    result["reproduction_attempt"] = True
+        
+        # Check for death conditions
+        death_chance = 0.0
+        
+        # Environmental stressors for fungi
+        if env_factors.moisture < 0.2:
+            death_chance += 0.03 * delta_time  # Drought is fatal
+        
+        if env_factors.temperature < 0.15:
+            death_chance += 0.02 * delta_time  # Too cold
+        
+        # Seasonal death factors
+        try:
+            if current_season == "Winter":
+                death_chance += 0.03 * delta_time  # Winter is harsh
+            # Sprout new in spring from spores
+            elif current_season == "Spring" and random.random() < 0.02 * delta_time:
+                # Chance of new growth outweighing death
+                death_chance -= 0.01 * delta_time
+        except:
+            pass
+            
+        # Resource issues
+        if not self.attached_to and self.energy < 0.3:
+            death_chance += 0.02 * delta_time  # Not enough resources
+        
+        # Old age
+        if self.age > self.lifespan * 0.8:
+            death_chance += 0.01 * delta_time  # Aging (fungi can be long-lived)
+        
+        # Apply the death chance (clamp to ensure it's not negative)
+        if random.random() < max(0, death_chance):
+            self.alive = False
+            result["alive"] = False
+            
+            if env_factors.moisture < 0.2:
+                result["death_cause"] = "desiccation"
+            elif self.age > self.lifespan * 0.8:
+                result["death_cause"] = "old_age"
+            else:
+                result["death_cause"] = "environmental_stress"
+        
         return result
     
     def _calculate_moisture_factor(self, moisture: float) -> float:
