@@ -379,6 +379,16 @@ class RichEnvironment(Environment):
                     total += resources
         
         return total
+        
+    def get_resource_types(self) -> List[ResourceType]:
+        """
+        Get a list of all resource types available in the environment.
+        
+        Returns:
+            List of resource types
+        """
+        # Return all possible resource types
+        return list(ResourceType)
 
     def add_organism(self, organism_id: str, position: Tuple[float, ...], organism_type: str, properties: Dict[str, Any] = None) -> None:
         """

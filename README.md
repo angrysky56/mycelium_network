@@ -11,6 +11,9 @@ Key features include:
 - **Resource allocation**: Nodes distribute resources based on their utility
 - **Chemical signaling**: Communication between nodes via signal propagation
 - **Environmental awareness**: Networks operate within simulated environments that can contain resources and obstacles
+- **Enhanced ecosystem**: Complex multi-organism environment with plants, herbivores, and decomposers
+- **Machine learning integration**: Reinforcement learning and transfer learning capabilities
+- **Adaptive specialization**: Nodes can specialize for different functions based on environmental conditions
 
 ## Installation
 
@@ -32,6 +35,9 @@ pip install -r requirements.txt
 ```
 mycelium_network/
 ├── examples/                  # Example scripts and utilities
+│   ├── enhanced_demo.py       # Demo for enhanced environment
+│   ├── ecosystem_demo.py      # Demo for ecosystem simulation
+│   ├── ml_integration_demo.py # Demo for machine learning capabilities
 │   ├── reorganized/           # Organized examples by category
 │   │   ├── advanced/          # Advanced utilization examples
 │   │   ├── basic/             # Basic task examples
@@ -42,11 +48,31 @@ mycelium_network/
 │   ├── environment.py         # Environment implementation
 │   ├── network.py             # Network implementation
 │   ├── node.py                # Node implementation
+│   ├── enhanced/              # Enhanced components
+│   │   ├── __init__.py
+│   │   ├── rich_environment.py # Advanced environment implementation
+│   │   ├── adaptive_network.py # Adaptive network implementation
+│   │   ├── resource.py        # Enhanced resource types
+│   │   ├── ecosystem/         # Ecosystem simulation
+│   │   │   ├── __init__.py
+│   │   │   ├── ecosystem.py   # Full ecosystem implementation
+│   │   │   ├── interaction.py # Organism interaction registry
+│   │   │   ├── organisms/     # Individual organism types
+│   │   │   │   ├── base.py    # Base organism class
+│   │   │   │   ├── plant.py   # Plant organisms
+│   │   │   │   ├── herbivore.py # Herbivore organisms
+│   │   │   │   └── decomposer.py # Decomposer organisms
+│   │   ├── ml/               # Machine learning components
+│   │   │   ├── __init__.py
+│   │   │   ├── reinforcement.py # Reinforcement learning
+│   │   │   └── transfer.py    # Transfer learning
 │   └── tasks/                 # Task-specific implementations
 │       ├── __init__.py
 │       ├── anomaly_detector.py
 │       ├── classifier.py
 │       └── regressor.py
+├── tools/                     # Utility tools
+│   └── profile_performance.py # Performance profiling tool
 ├── requirements.txt           # Project dependencies
 ├── README.md                  # This documentation
 └── venv/                      # Virtual environment (after setup)
@@ -61,17 +87,17 @@ Follow these steps to get started with Mycelium Network:
 2. **Run one of the example scripts** to see the network in action:
 
 ```bash
+# Run the enhanced environment demo
+python examples/enhanced_demo.py
+
+# Run the ecosystem simulation demo
+python examples/ecosystem_demo.py
+
+# Run the machine learning integration demo
+python examples/ml_integration_demo.py
+
 # Run a basic classification example using the Iris dataset
 python examples/reorganized/basic/classification_example.py
-
-# Run a regression example using synthetic data
-python examples/reorganized/basic/regression_example.py
-
-# Run an anomaly detection example
-python examples/reorganized/basic/anomaly_detection_example.py
-
-# Run an advanced example with environmental adaptation
-python examples/reorganized/advanced/environment_adaptation_example.py
 ```
 
 3. **Create your own implementation** based on the examples:
@@ -99,7 +125,7 @@ predictions = classifier.predict(X_test)
 
 ## Components
 
-### Environment
+### Basic Environment
 
 The `Environment` class provides the spatial context for the mycelium network:
 
@@ -112,9 +138,55 @@ env = Environment(dimensions=2)
 # Add resources and obstacles
 env.add_resource((0.3, 0.7), 1.5)
 env.add_obstacle((0.5, 0.5), 0.1)
+```
 
-# Create a grid of resources for testing
-env.create_grid_resources(grid_size=5, resource_value=1.0)
+### Rich Environment
+
+The enhanced `RichEnvironment` provides a more sophisticated environment model:
+
+```python
+from mycelium.enhanced.rich_environment import RichEnvironment
+from mycelium.enhanced.resource import ResourceType
+
+# Create a 3D environment with terrain layers
+env = RichEnvironment(dimensions=3, size=1.0, name="Demo Environment")
+
+# Add diverse resource types
+env.add_nutrient_cluster((0.5, 0.5, 0.6), 0.2, ResourceType.CARBON, 2.0)
+env.add_nutrient_cluster((0.3, 0.3, 0.65), 0.15, ResourceType.WATER, 1.5)
+
+# Create seasonal cycle
+env.create_seasonal_cycle(year_length=24.0, intensity=0.7)
+
+# Update environment over time
+env.update(delta_time=0.5)
+```
+
+### Ecosystem Simulation
+
+The ecosystem module provides a complex simulation of interacting organisms:
+
+```python
+from mycelium.enhanced.rich_environment import RichEnvironment
+from mycelium.enhanced.ecosystem.ecosystem import Ecosystem
+
+# Create a rich environment
+environment = RichEnvironment(dimensions=3, size=1.0)
+
+# Create an ecosystem
+ecosystem = Ecosystem(environment)
+
+# Populate with organisms
+ecosystem.populate_randomly(
+    num_plants=15,
+    num_herbivores=6,
+    num_decomposers=4
+)
+
+# Run simulation
+for i in range(30):
+    stats = ecosystem.update(delta_time=0.5)
+    print(f"Population: {stats['population']['total']} organisms")
 ```
 
 ### Network
@@ -137,55 +209,65 @@ network = AdvancedMyceliumNetwork(
 
 # Process inputs through the network
 outputs = network.forward([0.5, 0.7, 0.3])
-
-# Get network statistics
-stats = network.get_network_statistics()
 ```
 
-### Task-Specific Interfaces
+### Adaptive Network
 
-For specific machine learning tasks, use these specialized classes:
-
-```python
-# Classification
-from mycelium import MyceliumClassifier
-classifier = MyceliumClassifier(input_size=4, num_classes=3)
-classifier.fit(X_train, y_train)
-predictions = classifier.predict(X_test)
-
-# Regression
-from mycelium import MyceliumRegressor
-regressor = MyceliumRegressor(input_size=2, output_size=1)
-regressor.fit(X_train, y_train)
-predictions = regressor.predict(X_test)
-
-# Anomaly Detection
-from mycelium import MyceliumAnomalyDetector
-detector = MyceliumAnomalyDetector(input_size=10, contamination=0.1)
-detector.fit(X_train)
-anomalies = detector.predict(X_test)
-```
-
-## Visualization
-
-The examples include utilities for visualizing networks and their performance:
+The enhanced `AdaptiveMyceliumNetwork` adapts to environmental conditions:
 
 ```python
-# Import visualization utilities
-from examples.reorganized.utils.visualization import (
-    save_network_visualization_data,
-    generate_html_visualization,
-    plot_training_history
+from mycelium.enhanced.rich_environment import RichEnvironment
+from mycelium.enhanced.adaptive_network import AdaptiveMyceliumNetwork
+
+# Create a rich environment
+env = RichEnvironment(dimensions=3)
+
+# Create an adaptive network
+network = AdaptiveMyceliumNetwork(
+    environment=env,
+    input_size=2,
+    output_size=1,
+    initial_nodes=10
 )
 
-# Save network data for visualization
-save_network_visualization_data(network, "network_data.json")
+# Process inputs and adapt to environment
+for i in range(10):
+    outputs = network.forward([0.7, 0.3])
+    
+    # Check adaptation levels
+    stats = network.get_specialization_statistics()
+    print(f"Temperature adaptation: {stats['adaptation']['temperature_adaptation']:.3f}")
+```
 
-# Generate interactive HTML visualization
-generate_html_visualization("network_data.json", "network_visualization.html")
+### Machine Learning Integration
 
-# Plot training history
-plot_training_history(classifier.train_history, "training_history.png")
+The ML components provide reinforcement learning and transfer learning capabilities:
+
+```python
+from mycelium.enhanced.rich_environment import RichEnvironment
+from mycelium.enhanced.adaptive_network import AdaptiveMyceliumNetwork
+from mycelium.enhanced.ml.reinforcement import ReinforcementLearner
+from mycelium.enhanced.ml.transfer import TransferNetwork
+
+# Create networks and environments
+env1 = RichEnvironment()
+env2 = RichEnvironment()
+source_network = AdaptiveMyceliumNetwork(environment=env1)
+target_network = AdaptiveMyceliumNetwork(environment=env2)
+
+# Transfer knowledge between networks
+transfer = TransferNetwork(similarity_threshold=0.5)
+result = transfer.transfer_knowledge(source_network, target_network)
+print(f"Knowledge transfer success: {result['success']}")
+```
+
+## Performance Optimization
+
+The project includes a performance profiling tool to identify bottlenecks:
+
+```bash
+# Run the performance profiling tool
+python tools/profile_performance.py
 ```
 
 ## Advanced Features
@@ -195,22 +277,21 @@ plot_training_history(classifier.train_history, "training_history.png")
 Networks can adapt to changing environmental conditions:
 
 ```python
-# Create an enhanced environment with changing conditions
-from examples.reorganized.advanced.environment_adaptation_example import EnhancedEnvironment
-
-env = EnhancedEnvironment(dimensions=2)
-env.moisture_level = 0.7
-env.temperature = 0.5
-env.add_nutrient_cluster((0.3, 0.3), 0.15, "carbon", 1.2)
+# Create environment with changing conditions
+env = RichEnvironment(dimensions=2)
 
 # Create an adaptive network
 network = AdaptiveMyceliumNetwork(environment=env)
 
-# Run simulation with adaptation
-for i in range(30):
-    inputs = [random.random() for _ in range(2)]
-    outputs = network.forward(inputs)
-    print(f"Growth rate: {network.growth_rate}")
+# Simulate changing conditions
+env.factors.temperature = 0.8  # Hot environment
+env.factors.moisture = 0.2     # Dry environment
+env.update(delta_time=0.5)
+
+# Run network with adaptation
+for i in range(10):
+    outputs = network.forward([0.5, 0.5])
+    print(f"Temperature adaptation: {network.temperature_adaptation:.2f}")
 ```
 
 ## Troubleshooting
@@ -224,20 +305,38 @@ for i in range(30):
 2. **ValueError: Expected {input_size} inputs, got {len(inputs)}**
    - Ensure your input vectors match the dimensionality of the network
 
-3. **Memory issues with large networks**
-   - Reduce the number of initial nodes or growth rate
+3. **Memory issues with large ecosystems**
+   - Reduce the number of organisms in the simulation
    - Consider running on a machine with more memory
 
-### Performance Tips
+## Future Roadmap
 
-1. **Faster training:**
-   - Use fewer initial nodes and let the network grow adaptively
-   - Set higher learning rates initially, then decrease over time
+We're actively developing the following features:
 
-2. **Better accuracy:**
-   - Create environments with meaningful resource distribution
-   - Use obstacles to shape the network architecture
-   - Increase training epochs to allow for more adaptation
+1. **Performance Optimizations**
+   - Implement spatial indexing for faster resource lookups
+   - Optimize node connection algorithms
+   - Add parallel processing for network updates
+
+2. **Extended Ecosystem**
+   - Add more organism types (e.g., carnivores, symbiotic organisms)
+   - Implement more complex food webs and energy flows
+   - Create visualization tools for ecosystem monitoring
+
+3. **Advanced Learning Capabilities**
+   - Implement deep reinforcement learning integration
+   - Add evolutionary algorithms for network optimization
+   - Develop species-level adaptation using genetic algorithms
+
+4. **Visualization and Monitoring**
+   - Create interactive 3D visualizations for networks and ecosystems
+   - Implement real-time monitoring dashboards
+   - Add export tools for analysis in other software
+
+5. **Application Development**
+   - Create specialized adapters for common AI tasks
+   - Implement model comparison tools
+   - Develop example applications for real-world problems
 
 ## Contributing
 
