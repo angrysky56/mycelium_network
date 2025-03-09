@@ -188,9 +188,14 @@ def plot_ecosystem_data(data):
     
     plt.tight_layout()
     
-    # Save the figure
-    plt.savefig("ecosystem_simulation.png")
-    print("Plots saved to 'ecosystem_simulation.png'")
+    # Save the figure to the visualizations directory in the repository
+    import os
+    repo_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    vis_dir = os.path.join(repo_dir, "visualizations")
+    os.makedirs(vis_dir, exist_ok=True)  # Ensure directory exists
+    save_path = os.path.join(vis_dir, "ecosystem_simulation.png")
+    plt.savefig(save_path)
+    print(f"Plots saved to '{save_path}'")
     
     # Display if in an interactive environment
     try:

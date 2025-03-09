@@ -304,8 +304,13 @@ def demo_reinforcement_learning():
         
         # Save plot
         plt.tight_layout()
-        plt.savefig("rl_training_results.png")
-        print("\nTraining plot saved to 'rl_training_results.png'")
+        import os
+        repo_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+        vis_dir = os.path.join(repo_dir, "visualizations")
+        os.makedirs(vis_dir, exist_ok=True)  # Ensure directory exists
+        save_path = os.path.join(vis_dir, "rl_training_results.png")
+        plt.savefig(save_path)
+        print(f"\nTraining plot saved to '{save_path}'")
     except Exception as e:
         print(f"\nCould not create plot: {e}")
     

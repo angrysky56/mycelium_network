@@ -73,6 +73,9 @@ mycelium_network/
 │       └── regressor.py
 ├── tools/                     # Utility tools
 │   └── profile_performance.py # Performance profiling tool
+├── visualizations/            # Generated visualizations from demos
+│   ├── ecosystem_simulation.png  # Ecosystem demo visualization
+│   └── rl_training_results.png   # ML demo visualization
 ├── requirements.txt           # Project dependencies
 ├── README.md                  # This documentation
 └── venv/                      # Virtual environment (after setup)
@@ -87,14 +90,19 @@ Follow these steps to get started with Mycelium Network:
 2. **Run one of the example scripts** to see the network in action:
 
 ```bash
+# Make sure to activate the virtual environment first
+source venv/bin/activate  # On Windows: venv\Scripts\activate
+
 # Run the enhanced environment demo
 python examples/enhanced_demo.py
 
 # Run the ecosystem simulation demo
 python examples/ecosystem_demo.py
+# This will save a visualization plot to: visualizations/ecosystem_simulation.png
 
 # Run the machine learning integration demo
 python examples/ml_integration_demo.py
+# This will save a visualization plot to: visualizations/rl_training_results.png
 
 # Run a basic classification example using the Iris dataset
 python examples/reorganized/basic/classification_example.py
@@ -308,6 +316,11 @@ for i in range(10):
 3. **Memory issues with large ecosystems**
    - Reduce the number of organisms in the simulation
    - Consider running on a machine with more memory
+
+4. **Permission denied when saving plots**
+   - Visualization plots are saved to the 'visualizations/' directory in the repository
+   - Make sure your user has write permissions to this directory
+   - If issues persist, run the script with appropriate permissions or modify the save path in the demo scripts
 
 ## Future Roadmap
 

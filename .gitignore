@@ -31,11 +31,13 @@ ENV/
 # Output files from examples
 *.json
 *.html
-*.png
-*.jpg
 *.pdf
 output/
 examples/**/output/
+
+# Visualization outputs but keep directory
+visualizations/*
+!visualizations/.gitkeep
 
 # Test cache
 .pytest_cache/
