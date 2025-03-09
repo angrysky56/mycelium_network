@@ -131,9 +131,13 @@ class Decomposer(Organism):
                 delta_time
             )
             
+            # Add randomness to decomposition for more natural behavior
+            activity_factor = random.uniform(0.8, 1.2)
+            actual_decomp_rate = decomposition_rate * activity_factor
+            
             # Convert dead matter to nutrients (simulation)
             for nutrient_type in self.nutrients_released:
-                release_amount = decomposition_rate * random.uniform(0.5, 1.0)
+                release_amount = actual_decomp_rate * random.uniform(0.5, 1.0)
                 self.nutrients_released[nutrient_type] += release_amount
                 nutrients_released[nutrient_type] = release_amount
                 
@@ -141,12 +145,16 @@ class Decomposer(Organism):
                 # environment.add_resource(self.position, release_amount, nutrient_type)
             
             # Get energy from decomposition
-            energy_gain = decomposition_rate * 0.5
+            energy_gain = actual_decomp_rate * 0.5
             self.energy = min(1.0, self.energy + energy_gain)
+            
+            # Important: Make sure this value is non-zero for tracking
+            if energy_gain > 0:
+                print(f"Decomposer {self.id} processed dead organism {self.attached_to} and gained {energy_gain:.3f} energy")
             
             result["decomposing"] = {
                 "target": self.attached_to,
-                "rate": decomposition_rate,
+                "rate": actual_decomp_rate,
                 "energy_gain": energy_gain,
                 "nutrients_released": nutrients_released
             }

@@ -28,17 +28,21 @@ class InteractionRegistry:
         """Register the default ecosystem interactions."""
         # Plant and Herbivore interactions
         self.register_interaction("Plant", "Herbivore", "feeding")
+        self.register_interaction("Herbivore", "Plant", "feeding", bidirectional=False)
         
         # Plant and Decomposer interactions
-        self.register_interaction("Plant", "Decomposer", "symbiosis")
+        self.register_interaction("Plant", "Decomposer", "symbiosis", bidirectional=True)
         
         # Herbivore interactions
-        self.register_interaction("Herbivore", "Herbivore", "competition")
+        self.register_interaction("Herbivore", "Herbivore", "competition", bidirectional=True)
         
         # Decomposer interactions
         self.register_interaction("Decomposer", "Plant", "decomposition", bidirectional=False)
         self.register_interaction("Decomposer", "Herbivore", "decomposition", bidirectional=False)
         self.register_interaction("Decomposer", "Decomposer", "cooperation", bidirectional=True)
+        
+        # Additional interactions for dead organisms
+        self.register_interaction("Decomposer", "none", "decomposing", bidirectional=False)  # Special case for dead organisms
     
     def register_interaction(
         self,

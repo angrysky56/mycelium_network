@@ -23,6 +23,7 @@ from mycelium.enhanced.rich_environment import RichEnvironment
 from mycelium.enhanced.resource import ResourceType, Environmental_Factors
 from mycelium.enhanced.ecosystem.ecosystem import Ecosystem
 from mycelium.enhanced.ecosystem.organisms import Plant, Herbivore, Decomposer
+from mycelium.enhanced.ecosystem.organisms.plant import Plant
 
 
 def print_separator(title):
@@ -80,7 +81,7 @@ def demo_ecosystem_creation():
     return ecosystem
 
 
-def run_ecosystem_simulation(ecosystem, steps=20, time_per_step=0.5):
+def run_ecosystem_simulation(ecosystem, steps=60, time_per_step=0.5):
     """Run the ecosystem simulation for several steps."""
     print_separator("Ecosystem Simulation")
     
@@ -209,11 +210,61 @@ def main():
     print("Enhanced Mycelium Network Ecosystem Demo")
     print("====================================")
     
+    # Make sure we have random imported
+    import random
+    
     # Create the ecosystem
     ecosystem = demo_ecosystem_creation()
     
+    # Add some dead organisms for the decomposers
+    dead_plants = []
+    for i in range(3):
+        # Create a dead plant
+        position = tuple(random.random() * ecosystem.environment.size for _ in range(ecosystem.environment.dimensions))
+        dead_plant = Plant(
+            organism_id=f"dead_plant_{i+1}",
+            position=position,
+            energy=0.1,
+            size=random.uniform(0.5, 1.0)
+        )
+        dead_plant.alive = False  # Set as dead
+        dead_plant_id = ecosystem.add_organism(dead_plant)
+        dead_plants.append(dead_plant_id)
+    
+    print(f"Added {len(dead_plants)} dead plants for decomposers")
+    
+    # Let's manually position herbivores and plants close to each other to force interactions
+    herbivores = ecosystem.get_organisms_by_type("herbivore")
+    plants = ecosystem.get_organisms_by_type("plant")
+    
+    # Position each herbivore near a plant
+    for i, herbivore in enumerate(herbivores):
+        if i < len(plants):
+            plant = plants[i]
+            # Move herbivore closer to plant
+            plant_pos = plant.position
+            new_pos = []
+            for j in range(len(plant_pos)):
+                # Position slightly offset from plant
+                offset = 0.05  # Small distance
+                new_pos.append(plant_pos[j] + random.uniform(-offset, offset))
+            herbivore.position = tuple(new_pos)
+            print(f"Positioned herbivore {herbivore.id} near plant {plant.id}")
+    
+    # Position decomposers near dead plants
+    decomposers = ecosystem.get_organisms_by_type("decomposer")
+    for i, decomposer in enumerate(decomposers):
+        if i < len(dead_plants):
+            dead_plant_id = dead_plants[i]
+            dead_plant = ecosystem.organisms[dead_plant_id]
+            # Move decomposer right to the dead plant
+            decomposer.position = dead_plant.position
+            # Set it as attached
+            decomposer.attached_to = dead_plant_id
+            print(f"Positioned decomposer {decomposer.id} on dead plant {dead_plant_id}")
+    
     # Run simulation
-    simulation_data = run_ecosystem_simulation(ecosystem, steps=40, time_per_step=0.5)
+    simulation_data = run_ecosystem_simulation(ecosystem, steps=60, time_per_step=0.5)
     
     # Plot data
     try:
