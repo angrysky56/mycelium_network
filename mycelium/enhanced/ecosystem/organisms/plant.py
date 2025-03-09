@@ -86,18 +86,38 @@ class Plant(Organism):
         if not self.alive:
             return result
         
-        # Plant-specific behavior: Photosynthesis
-        light_level = environment.factors.light_level
-        
         # Get environmental factors at plant's position
         env_factors = environment.get_environmental_factors_at(self.position)
+        light_level = env_factors.light_level
         
-        # Calculate photosynthesis efficiency based on light, water, and CO2
-        # Higher in well-lit, moist environments
+        # Calculate season information
+        try:
+            season_idx = int(((environment.time % environment.year_length) / environment.year_length) * 4) % 4
+            season_names = ["Spring", "Summer", "Fall", "Winter"]
+            current_season = season_names[season_idx]
+            
+            # Season-specific growth rates
+            season_growth_factors = {
+                "Spring": 1.2,  # Rapid growth
+                "Summer": 1.0,  # Normal growth
+                "Fall": 0.6,    # Slowing growth
+                "Winter": 0.2   # Minimal growth
+            }
+            season_factor = season_growth_factors[current_season]
+        except AttributeError:
+            # If environment doesn't have year_length, default to no seasonal effect
+            season_factor = 1.0
+        
+        # Modify photosynthesis based on environmental factors
+        light_factor = min(1.5, max(0.2, light_level * 2))  # Light is crucial
+        moisture_factor = min(1.2, max(0.3, env_factors.moisture * 1.5))  # Moisture important
+        
+        # Photosynthesis affected by light, moisture, and season
         photosynthesis_rate = (
             self.properties["photosynthesis_efficiency"] *
-            light_level * 
-            math.sqrt(env_factors.moisture)
+            light_factor * 
+            moisture_factor *
+            season_factor
         )
         
         # Energy gain from photosynthesis
@@ -114,17 +134,30 @@ class Plant(Organism):
                     consumption = 0.01 * delta_time * self.size * self.nutrient_needs.get(resource_type, NutrientNeed.LOW).value
                     # (Note: In a real implementation, we would update environment resources here)
         
-        # Growth if conditions favorable
+        # Growth affected by all environmental factors and season
+        growth_rate = self.properties["growth_rate"] * season_factor
+        
+        # Growth conditions improved to be more sensitive to environment
+        growth_conditions = env_factors.moisture > 0.3 and light_level > 0.3 and self.energy > 0.6
+        
+        # Calculate growth based on conditions
         growth = 0
-        growth_conditions = env_factors.moisture > 0.4 and light_level > 0.4 and self.energy > 0.7
         if growth_conditions:
-            growth = self.properties["growth_rate"] * delta_time
+            combined_factor = light_factor * moisture_factor * season_factor
+            growth = growth_rate * combined_factor * delta_time
             self.size += growth
             self.energy -= growth * 0.5  # Growth costs energy
+            
+            # Output seasonal info for debugging
+            if hasattr(environment, "year_length"):
+                result["season"] = current_season
+                result["season_factor"] = season_factor
         
         result.update({
             "photosynthesis": energy_gain,
-            "growth": growth
+            "growth": growth,
+            "light_factor": light_factor,
+            "moisture_factor": moisture_factor
         })
         
         return result

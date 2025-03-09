@@ -101,8 +101,33 @@ class Decomposer(Organism):
         # Get environmental factors
         env_factors = environment.get_environmental_factors_at(self.position)
         
-        # Decomposers thrive in moist environments
+        # Calculate season information
+        try:
+            season_idx = int(((environment.time % environment.year_length) / environment.year_length) * 4) % 4
+            season_names = ["Spring", "Summer", "Fall", "Winter"]
+            current_season = season_names[season_idx]
+            
+            # Seasonal factors (decomposers love fall!)
+            season_factors = {
+                "Spring": 0.9,
+                "Summer": 1.1,
+                "Fall": 1.5,   # Lots of dead matter in fall
+                "Winter": 0.4  # Very slow in winter
+            }
+            
+            # Apply seasonal factor
+            seasonal_factor = season_factors[current_season]
+            result["season"] = current_season
+        except AttributeError:
+            # If environment doesn't have year_length, default to no seasonal effect
+            seasonal_factor = 1.0
+            
+        # Decomposers thrive in warm, moist environments
+        temp_factor = min(1.5, max(0.2, env_factors.temperature * 1.8))
         moisture_factor = self._calculate_moisture_factor(env_factors.moisture)
+        
+        # Combined environmental activity factor
+        env_activity_factor = temp_factor * moisture_factor * seasonal_factor
         
         # Find dead organisms to decompose
         if not self.attached_to and hasattr(environment, "get_organisms_in_range"):
@@ -123,10 +148,10 @@ class Decomposer(Organism):
         # If attached to a dead organism, decompose it
         nutrients_released = {}
         if self.attached_to:
-            # Decompose at a rate based on environmental conditions
+            # Decomposition rate affected by environment and season
             decomposition_rate = (
                 self.properties["decomposition_rate"] *
-                moisture_factor *
+                env_activity_factor *
                 self.properties["enzyme_efficiency"] * 
                 delta_time
             )
@@ -159,10 +184,11 @@ class Decomposer(Organism):
                 "nutrients_released": nutrients_released
             }
         
-        # Grow and spread if conditions are favorable
-        if env_factors.moisture > 0.5 and self.energy > 0.6:
-            # Calculate growth
-            growth = self.properties["growth_rate"] * moisture_factor * delta_time
+        # Grow and spread if conditions are favorable - now affected by season and temperature too
+        growth_conditions = env_factors.moisture > 0.4 and self.energy > 0.5 and env_factors.temperature > 0.3
+        if growth_conditions:
+            # Calculate growth using the combined environmental factor
+            growth = self.properties["growth_rate"] * env_activity_factor * delta_time
             self.size += growth
             
             # Extend hypha network

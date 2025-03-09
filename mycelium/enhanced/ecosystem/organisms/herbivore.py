@@ -93,8 +93,38 @@ class Herbivore(Organism):
         if not self.alive:
             return result
         
-        # Update hunger level (increases over time)
-        self.hunger_level = min(1.0, self.hunger_level + 0.01 * delta_time)
+        # Get environmental factors
+        env_factors = environment.get_environmental_factors_at(self.position)
+        
+        # Calculate season information
+        try:
+            season_idx = int(((environment.time % environment.year_length) / environment.year_length) * 4) % 4
+            season_names = ["Spring", "Summer", "Fall", "Winter"]
+            current_season = season_names[season_idx]
+            
+            # Season-specific metabolism adjustments
+            metabolism_factors = {
+                "Spring": 0.9,   # Moderate metabolism as food becomes available
+                "Summer": 1.0,   # Normal metabolism
+                "Fall": 1.1,     # Higher metabolism to prepare for winter
+                "Winter": 0.7    # Lower metabolism to conserve energy
+            }
+            
+            # Apply seasonal metabolism factor
+            seasonal_metabolism = self.metabolism_rate * metabolism_factors[current_season]
+            result["season"] = current_season
+        except AttributeError:
+            # If environment doesn't have year_length, default to no seasonal effect
+            seasonal_metabolism = self.metabolism_rate
+            
+        # Temperature affects metabolism
+        temp_factor = 0.5 + env_factors.temperature  # Higher temp = higher metabolism
+        
+        # Final metabolism rate
+        effective_metabolism = seasonal_metabolism * temp_factor * delta_time
+        
+        # Update hunger level based on adjusted metabolism
+        self.hunger_level = min(1.0, self.hunger_level + effective_metabolism * 0.5)
         
         # Get nearby plants
         plants_in_range = {}

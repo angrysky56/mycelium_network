@@ -530,13 +530,61 @@ class RichEnvironment(Environment):
         # Day-night cycle
         day_phase = (self.time % self.day_length) / self.day_length
         
-        # Light follows day-night cycle
-        if day_phase < 0.25 or day_phase > 0.75:
+        # Get seasonal information
+        try:
+            year_phase = (self.time % self.year_length) / self.year_length
+            season_idx = int(year_phase * 4) % 4
+            season_names = ["Spring", "Summer", "Fall", "Winter"]
+            current_season = season_names[season_idx]
+        except AttributeError:
+            # Default if no year_length defined
+            year_phase = 0
+            season_idx = 0
+            current_season = "Spring"
+            
+        # Light follows day-night cycle, modified by season
+        # Seasonal daylight length modifiers
+        daylight_modifiers = {
+            "Spring": 0.0,    # Default length
+            "Summer": 0.1,   # Longer days
+            "Fall": 0.0,     # Default length
+            "Winter": -0.1   # Shorter days
+        }
+        
+        # Modify day/night transitions based on season
+        day_start = 0.25 - daylight_modifiers.get(current_season, 0.0)
+        day_end = 0.75 + daylight_modifiers.get(current_season, 0.0)
+        
+        if day_phase < day_start or day_phase > day_end:
             # Night time
             self.factors.light_level = max(0.1, self.factors.light_level - 0.1 * delta_time)
         else:
-            # Day time
-            self.factors.light_level = min(1.0, self.factors.light_level + 0.1 * delta_time)
+            # Day time - stronger in summer, weaker in winter
+            light_intensity = 0.1
+            if current_season == "Summer":
+                light_intensity = 0.15
+            elif current_season == "Winter":
+                light_intensity = 0.05
+                
+            self.factors.light_level = min(1.0, self.factors.light_level + light_intensity * delta_time)
+            
+        # Random weather effects
+        if random.random() < 0.02 * delta_time:
+            weather_type = random.choices(["sunny", "cloudy", "rainy", "windy"], 
+                                        weights=[0.4, 0.3, 0.2, 0.1])[0]
+            
+            if weather_type == "cloudy":
+                self.factors.light_level = max(0.1, self.factors.light_level - 0.2)
+                self.factors.wind = max(0.1, self.factors.wind - 0.1)
+            elif weather_type == "rainy":
+                self.factors.moisture = min(1.0, self.factors.moisture + 0.2)
+                self.factors.light_level = max(0.1, self.factors.light_level - 0.15)
+            elif weather_type == "windy":
+                self.factors.wind = min(1.0, self.factors.wind + 0.3)
+                self.factors.moisture = max(0.1, self.factors.moisture - 0.1)  # Drying effect
+            elif weather_type == "sunny":
+                self.factors.light_level = min(1.0, self.factors.light_level + 0.15)
+                self.factors.temperature = min(1.0, self.factors.temperature + 0.1)
     
     def get_environmental_factors_at(self, position: Tuple[float, ...]) -> Environmental_Factors:
         """
