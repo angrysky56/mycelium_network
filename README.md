@@ -24,13 +24,18 @@ Key features include:
 git clone https://github.com/yourusername/mycelium_network.git
 cd mycelium_network
 
-# Setup a virtual environment (recommended)
+# Setup a virtual environment (required)
 python -m venv venv
 source venv/bin/activate  # On Windows: venv\Scripts\activate
 
 # Install dependencies
 pip install -r requirements.txt
+
+# Run a quick test to verify the environment is set up correctly
+python quick_test.py
 ```
+
+> **Important**: You must activate the virtual environment before running any scripts or tests. The project relies on specific package versions and paths, so running outside the virtual environment will likely result in errors.
 
 ## Project Structure
 

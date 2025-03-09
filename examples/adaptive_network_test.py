@@ -24,7 +24,7 @@ from mycelium.network import AdvancedMyceliumNetwork
 
 # Import the enhanced components
 from mycelium.enhanced.resource import ResourceType, Environmental_Factors
-from mycelium.enhanced.environment import RichEnvironment
+from mycelium.enhanced.rich_environment import RichEnvironment
 from mycelium.enhanced.adaptive_network import AdaptiveMyceliumNetwork
 
 

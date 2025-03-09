@@ -23,8 +23,8 @@ from mycelium.environment import Environment
 
 # Import the enhanced environment components
 from mycelium.enhanced.resource import ResourceType, Environmental_Factors
-from mycelium.enhanced.layers import TerrainLayer
-from mycelium.enhanced.environment import RichEnvironment
+from mycelium.enhanced.environment import TerrainLayer
+from mycelium.enhanced.rich_environment import RichEnvironment
 from mycelium.enhanced.environment_utils import (
     count_resources_in_layer,
     apply_seasonal_spring_effect,
