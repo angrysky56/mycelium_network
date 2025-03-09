@@ -1,0 +1,73 @@
+# Python bytecode
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Distribution / packaging
+dist/
+build/
+*.egg-info/
+*.egg
+
+# Virtual environments
+venv/
+env/
+ENV/
+.env
+.venv
+.virtualenv
+
+# Jupyter Notebook
+.ipynb_checkpoints
+*.ipynb
+
+# IDE files
+.idea/
+.vscode/
+*.swp
+*.swo
+.DS_Store
+
+# Output files from examples
+*.json
+*.html
+*.png
+*.jpg
+*.pdf
+output/
+examples/**/output/
+
+# Test cache
+.pytest_cache/
+.coverage
+htmlcov/
+.tox/
+
+# Log files
+*.log
+logs/
+
+# Local configuration
+.local/
+local_settings.py
+
+# Data files (uncomment if you don't want to track data files)
+# *.csv
+# *.xlsx
+# *.db
+# *.sqlite3
+
+# Documentation build
+docs/_build/
+site/
+
+# Environment-specific files
+.env.local
+.env.development
+.env.test
+.env.production
+
+# Temporary files
+*.tmp
+*.bak
+temp/

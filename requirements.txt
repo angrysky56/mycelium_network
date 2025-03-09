@@ -1,0 +1,20 @@
+# Core dependencies
+numpy>=1.20.0
+scikit-learn>=1.0.0
+matplotlib>=3.5.0
+
+# Interactive visualization
+jupyterlab>=3.0.0
+ipywidgets>=7.6.0
+plotly>=5.0.0
+seaborn>=0.11.0
+
+# Testing and development
+pytest>=6.0.0
+pytest-cov>=2.12.0
+black>=21.5b2
+flake8>=3.9.0
+
+# Documentation
+sphinx>=4.0.0
+sphinx-rtd-theme>=0.5.2
