@@ -15,7 +15,7 @@ Key features include:
 - **Machine learning integration**: Reinforcement learning and transfer learning capabilities
 - **Adaptive specialization**: Nodes can specialize for different functions based on environmental conditions
 
-[Demo Visualizations from Project Wiki](https://github.com/angrysky56/mycelium_network/wiki/Demo-Visualizations)
+[Prototype Demo Visualizations from Wiki](https://github.com/angrysky56/mycelium_network/wiki/Demo-Visualizations)
 
 ## Installation
 
